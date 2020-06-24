@@ -10,4 +10,14 @@
     <color name="colorViewLine">#DDDDDD</color>
 
     <color name="colorNavItemSelected">#F1F1F1</color>
+
+    <color name="colorLightGreenBox">#BB77D353</color>
+
+    <color name="colorOrangeInfo">#FF9052</color>
+
+    <color name="colorLightYellowBox">#BBFFF150</color>
+
+    <color name="colorFieldFocused">#F2F9FF</color>
+
+    <color name="colorBackgroundProxy">#55FFFFFF</color>
 </resources>

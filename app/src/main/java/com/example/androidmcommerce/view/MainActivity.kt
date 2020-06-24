@@ -1,11 +1,13 @@
 package com.example.androidmcommerce.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,9 +18,8 @@ import com.example.androidmcommerce.domain.User
 import com.example.androidmcommerce.util.NavMenuItemDetailsLookup
 import com.example.androidmcommerce.util.NavMenuItemKeyProvider
 import com.example.androidmcommerce.util.NavMenuItemPredicate
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.app_bar.*
 import kotlinx.android.synthetic.main.nav_header_user_logged.*
 import kotlinx.android.synthetic.main.nav_header_user_not_logged.*
 import kotlinx.android.synthetic.main.nav_menu.*
@@ -30,6 +31,11 @@ class MainActivity : AppCompatActivity() {
         R.drawable.user,
         false
     )
+
+    companion object {
+        const val FRAGMENT_TAG = "frag-tag"
+        const val FRAGMENT_ID = "frag-id"
+    }
 
     lateinit var navMenuItems : List<NavMenuItem>
     lateinit var selectNavMenuItems: SelectionTracker<Long>
@@ -43,11 +49,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar,
             R.string.navigation_drawer_open,
@@ -58,8 +59,60 @@ class MainActivity : AppCompatActivity() {
         toggle.syncState()
 
         initNavMenu(savedInstanceState)
+
+        initFragment()
     }
 
+
+    private fun initFragment(){
+        val supFrag = supportFragmentManager
+        var fragment = supFrag.findFragmentByTag( FRAGMENT_TAG )
+
+        /*
+         * Se não for uma reconstrução de atividade, então não
+         * haverá um fragmento em memória, então busca-se o
+         * inicial.
+         * */
+        if( fragment == null ){
+            /*
+        * Caso haja algum ID de fragmento em intent, então
+        * é este fragmento que deve ser acionado. Caso
+        * contrário, abra o fragmento comum de início.
+        * */
+            var fragId = intent?.getIntExtra( FRAGMENT_ID, 0 )
+            if( fragId == 0 ){
+                fragId = R.id.item_about
+            }
+
+            fragment = getFragment( fragId!!.toLong() )
+        }
+
+        replaceFragment( fragment )
+    }
+
+    private fun getFragment( fragId: Long ): Fragment{
+        return when( fragId ){
+            R.id.item_about.toLong() -> AboutFragment()
+            R.id.item_contact.toLong() -> ContactFragment()
+            R.id.item_privacy_policy.toLong() -> PrivacyPolicyFragment()
+            else -> AboutFragment()
+        }
+    }
+
+    private fun replaceFragment( fragment: Fragment){
+        supportFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fl_fragment_container,
+                fragment,
+                FRAGMENT_TAG
+            )
+            .commit()
+    }
+
+    fun updateToolbarTitleInFragment(titleId: Int){
+        toolbar.title = getString(titleId)
+    }
 
     override fun onSaveInstanceState( outState: Bundle) {
         super.onSaveInstanceState( outState )
@@ -78,8 +131,6 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-
-
     private fun initNavMenu(savedInstanceState: Bundle?){
         navMenu = NavMenuItemsDataBase( this )
         navMenuItems = navMenu.items
@@ -94,7 +145,22 @@ class MainActivity : AppCompatActivity() {
             selectNavMenuItems.onRestoreInstanceState( savedInstanceState )
             selectNavMenuItemsLogged.onRestoreInstanceState( savedInstanceState )
         }else{
-            selectNavMenuItems.select(R.id.item_all_shoes.toLong())
+            /*
+        * Verificando se há algum item ID em intent. Caso não,
+        * utilize o ID do primeiro item.
+        * */
+            var fragId = intent.getIntExtra( FRAGMENT_ID, 0 )
+            if(fragId == 0){
+                fragId = R.id.item_all_shoes
+            }
+
+            /*
+             * O primeiro item do menu gaveta deve estar selecionado
+             * caso não seja uma reinicialização de tela / atividade
+             * ou o envio de um ID especifico de fragmento a ser aberto.
+             * O primeiro item aqui é o de ID R.id.item_all_shoes.
+             * */
+            selectNavMenuItems.select( fragId.toLong() )
         }
 
     }
@@ -110,6 +176,7 @@ class MainActivity : AppCompatActivity() {
             rv_menu_items_logged.visibility = View.GONE
         }
     }
+
     private fun fillUserHeaderNavMenu(){
         if( user.status ) { /* Conectado */
             iv_user.setImageResource(user.image)
@@ -125,7 +192,7 @@ class MainActivity : AppCompatActivity() {
         initNavMenuItemsSelection()
     }
 
-        private fun initNavMenuItemsSelection(){
+    private fun initNavMenuItemsSelection(){
 
         selectNavMenuItems = SelectionTracker.Builder<Long>(
                 "id-selected-item",
@@ -221,14 +288,18 @@ class MainActivity : AppCompatActivity() {
              * */
             callbackRemoveSelection()
 
-            /*
-             * TODO: Mudança de Fragment
-             * */
+            val fragment:Fragment = getFragment(key)
+            replaceFragment(fragment)
 
             /*
              * Fechando o menu gaveta.
              * */
             drawer_layout.closeDrawer( GravityCompat.START )
         }
+    }
+
+    fun callLoginActivity( view: View ){
+        val intent = Intent( this, LoginActivity::class.java )
+        startActivity( intent )
     }
 }
