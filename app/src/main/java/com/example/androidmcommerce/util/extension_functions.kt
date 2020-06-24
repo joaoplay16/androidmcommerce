@@ -35,7 +35,8 @@ fun EditText.validate(
     validator: (String) -> Boolean,
     message: String) {
 
-    this.afterTextChanged{
+    afterTextChanged{
+        Log.d("DEV", validator(it).toString())
         this.error =
             if (validator(it))
                 null

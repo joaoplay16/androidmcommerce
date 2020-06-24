@@ -11,25 +11,25 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
 import com.example.androidmcommerce.R
 import com.example.androidmcommerce.util.CustomTypefaceSpan
 import kotlinx.android.synthetic.main.fragment_policy_privacy.*
 
-/**
- * A simple [Fragment] subclass.
- */
+
 class PrivacyPolicyFragment : Fragment() {
-    
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         return inflater
             .inflate(
                 R.layout.fragment_policy_privacy,
@@ -38,8 +38,16 @@ class PrivacyPolicyFragment : Fragment() {
             )
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onActivityCreated( savedInstanceState: Bundle? ) {
+        super.onActivityCreated( savedInstanceState )
+
+        /*
+         * Vamos manter a invocação do método privacyPolicyLoad()
+         * em um método que vem depois do método onCreateActivity()
+         * para assim podermos manter a sintaxe
+         * kotlin-android-extensions de acesso às Views do layout
+         * do fragmento.
+         * */
         privacyPolicyLoad()
     }
 
@@ -111,7 +119,7 @@ class PrivacyPolicyFragment : Fragment() {
 
                 /*
                  * Obtendo o tamanho correto do texto de acordo com a
-                 * Annotation Span de título presente nele.
+                 * AnnotationSpan de título presente nele.
                  * */
                 val textSizeSpan = when( annotation.value ){
                     "main" -> RelativeSizeSpan( 1.5F )
@@ -124,8 +132,8 @@ class PrivacyPolicyFragment : Fragment() {
                     textEndPos,
                     spanFlag
                 )
-
-        } else if( annotation.key.equals("link") ){ /* Links. */
+            }
+            else if( annotation.key.equals("link") ){ /* Links. */
 
                 /*
                  * Os "+ 1" e "- 1" sendo utilizados é
@@ -177,8 +185,9 @@ class PrivacyPolicyFragment : Fragment() {
          * o espaço em branco do início do texto de
          * Políticas de Privacidade no arquivo XML.
          * */
-        tv_privacy_policy_content.text = spannedText.trimStart()
-        }
+        //tv_privacy_policy_content.text = spannedText.trimStart()
+        tv_privacy_policy_content.text = spannedText
+    }
 
     override fun onResume() {
         super.onResume()
